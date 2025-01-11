@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .field {
+            margin-bottom: 15px;
+        }
+        .field label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .field span {
+            display: block;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        .error {
+            color: red;
+            text-align: center;
+        }
+        .input-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .input-container input {
+            padding: 10px;
+            font-size: 16px;
+            width: 80%;
+            margin-bottom: 10px;
+        }
+        .input-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Agent Details</h1>
+        <div class="input-container">
+            <input type="text" id="agentName" placeholder="Enter agent name">
+            <button onclick="fetchAgentDetails()">Fetch Details</button>
+        </div>
+        <div id="agentDetails"></div>
+        <div id="errorMessage" class="error"></div>
+    </div>
+
+    <script>
+        async function fetchAgentDetails() {
+            const agentNameInput = document.getElementById('agentName');
+            const agentName = agentNameInput.value.trim();
+            const agentDetailsDiv = document.getElementById('agentDetails');
+            const errorMessageDiv = document.getElementById('errorMessage');
+
+            if (!agentName) {
+                errorMessageDiv.textContent = 'Please enter an agent name.';
+                agentDetailsDiv.innerHTML = '';
+                return;
+            }
+
+            const url = `https://api.qude.ai/api/agent/${encodeURIComponent(agentName)}`;
+
+            try {
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                agentDetailsDiv.innerHTML = '';
+                errorMessageDiv.textContent = '';
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                for (const [key, value] of Object.entries(data)) {
+                    const fieldDiv = document.createElement('div');
+                    fieldDiv.className = 'field';
+
+                    const label = document.createElement('label');
+                    label.textContent = key;
+                    fieldDiv.appendChild(label);
+
+                    const valueSpan = document.createElement('span');
+                    valueSpan.textContent = value;
+                    fieldDiv.appendChild(valueSpan);
+
+                    agentDetailsDiv.appendChild(fieldDiv);
+                }
+            } catch (error) {
+                agentDetailsDiv.innerHTML = '';
+                errorMessageDiv.textContent = error.message || 'Agent not found.';
+            }
+        }
+    </script>
+</body>
+</html>
